@@ -1,0 +1,113 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{minted}
+\usepackage{xcolor} % to access the named colour LightGray
+\definecolor{LightGray}{gray}{0.9}
+
+\usemintedstyle{vim}
+\begin{document}
+
+\title{\textbf{Smooth like...R\footnote{@primeking47}}\\
+        Running RStudio in a Docker Container}
+\author{}
+\date{March 2023}
+\maketitle
+
+\section{Introduction}
+
+One of the challenges of working with R programming is managing dependencies and ensuring that packages do not break due to version conflicts or updates. Sharing code and data with collaborators can also be difficult if they are not working in the same environment. Docker is a platform that can help to solve these issues by providing a reproducible environment for running R code. Docker is operating system agnostic and fast, making it an ideal choice for creating and sharing R environments.
+
+In this tutorial, we will cover how to install Docker on your computer, and how to use it to run RStudio with a reproducible environment. We will also demonstrate how to attach a local file to the Docker environment, so that you can work with your own data and code.
+\section{Installing Docker}
+
+Docker is a powerful platform for developing, deploying, and running applications in containers. To get started with Docker, you'll need to install it on your local machine.
+
+The first step is to go to the Docker website at \url{https://docs.docker.com/get-docker/} and follow the instructions for your operating system. This will typically involve downloading and running an installer, which will guide you through the installation process.
+
+Once Docker is installed, you can verify that it's running by opening a terminal window and typing the following command:
+
+\begin{minted}
+[
+framesep=2mm,
+baselinestretch=1.2
+]
+{vim}
+docker run hello-world
+\end{minted}
+
+This command will download a small Docker image called \texttt{hello-world} and run it in a container. If everything is working correctly, you should see a message confirming that Docker is installed and running correctly.
+
+\section{Running RStudio with Docker}
+
+With Docker installed, you can easily set up and run RStudio by using a Docker image specifically designed for R programming by the Rocker project.\footnote{\url{https://rocker-project.org/}} To run RStudio with Docker, simply open a terminal window and type the following command:
+
+
+\begin{minted}[
+framesep=2mm,
+baselinestretch=1.2
+]
+{vim}
+docker run --rm -ti \
+        -e PASSWORD=yourpassword \
+        -p 8787:8787 \
+        rocker/rstudio
+\end{minted}
+
+This command will download the latest version of the \texttt{rocker/rstudio} Docker image from Docker Hub, and then start a new container running RStudio. Here's what the different parts of the command mean:
+
+\begin{itemize}
+\item \texttt{--rm}: This flag tells Docker to automatically remove the container when you exit it, so you don't accumulate unused containers over time.
+\item \texttt{-ti}: These flags allocate a terminal and make the container interactive, so you can use RStudio just as you would on your local machine.
+\item \texttt{-e PASSWORD=yourpassword}: This flag sets the password for RStudio to \texttt{yourpassword}, which you can replace with a password of your choice.
+\item \texttt{-v /host:/docker}: This flag attaches a local directory called \texttt{/host} to a directory called \texttt{/docker} inside the container. This makes it easy to share files and data between your local machine and the container. You can replace \texttt{/host} with the path to any directory on your local machine that you want to share with the container.
+\item \texttt{-p 8787:8787}: This flag maps port 8787 on the container to port 8787 on your local machine, so you can access RStudio by going to \url{http://localhost:8787} in your web browser.
+\end{itemize}
+
+Once the container is running, you can open RStudio by going to \url{http://localhost:8787} in your web browser and log in with user/password rstudio/yourpassword  (password you set with the \texttt{-e PASSWORD} flag). 
+
+\section{Saving Your Work}
+
+When you're working with Docker and RStudio, you'll likely want to save your work so you can come back to it later. There are two main ways to save your work with Docker: bind mounts and Docker volumes.
+
+\subsection{Bind Mounts}
+
+A bind mount is a way to mount a directory on your host machine into a container.\footnote{\url{https://docs.docker.com/storage/bind-mounts/}} This allows you to access and modify files on your host machine from within the container. To create a bind mount, you can use the \texttt{-v} flag when starting your container:
+
+\begin{minted}[
+framesep=2mm,
+baselinestretch=1.2
+]
+{vim}
+docker run -v /path/on/host:/path/in/container ...
+\end{minted}
+
+In this example, \texttt{/path/on/host} is the path to the directory you want to mount on your host machine, and \texttt{/path/in/container} is the path to where you want to mount it in the container.
+
+\subsection{Docker Volumes}
+
+Docker volumes are a more flexible and powerful way to manage data in your containers.\footnote{\url{https://docs.docker.com/storage/volumes/}} Volumes are managed by Docker and can be shared between multiple containers or even multiple machines. To create a Docker volume, you can use the \texttt{docker volume create} command:
+
+\begin{minted}[
+framesep=2mm,
+baselinestretch=1.2
+]
+{vim}
+docker volume create my-volume
+\end{minted}
+
+In this example, \texttt{my-volume} is the name of the volume you're creating. You can then use this volume when starting your container:
+
+\begin{minted}[
+framesep=2mm,
+baselinestretch=1.2
+]
+{vim}
+docker run -v my-volume:/path/in/container ...
+\end{minted}
+
+In this example, \texttt{my-volume} is the name of the volume you created earlier, and \texttt{/path/in/container} is the path to where you want to mount it in the container.
+
+It is important to keep in mind that using Docker volumes is the recommended approach for handling data in containers due to their superior flexibility and portability compared to bind mounts. With this information, you should have a fully operational RStudio environment in a Docker container, equipped with all your preferred R tools and packages.
+\end{document}
